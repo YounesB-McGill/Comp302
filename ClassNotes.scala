@@ -840,6 +840,100 @@ res17: Int = 15
       // 5 + k // error: can't access k
     }
     
+    /* Algol style: A name declared in a scope is known to its scope and all subscopes.
+     * Shadowing means the same symbol represents many values (eg in C/Java for loops)
+     * 
+     * So we nest on a chain of environments:
+     * 
+     * Global →(parent pointer)→ foo() → bar() → ping()
+     * 
+     * This can be more complex than it looks!
+     * Not necessarily a tree.
+     *  
+     */
+    
+    def example() = {
+      var x = 10;
+      {
+        var x = 1
+        x = x + x // 2
+      }
+      x = x + x
+      x // 20
+    }
+    
+    /* JavaScript has weird scoping:
+     * 
+     * function foo() {
+     *   var x = 1
+     *   { var x = 2 }
+     *   return x // returns 2
+     * } 
+     * 
+     * // is equivalent to:
+     * 
+     * function foo() {
+     *   var x
+     *   x = 1
+     *   { x = 2 }
+     *   return x // still 2
+     * }
+     * 
+     * But Scala is more sane (ie we'll get 1)
+     */
+    
+    /*
+     * Declaration order:
+     * Modular-3 style: order doesn't matter! 
+     * But Scala complains sometimes
+     */
+    
+    def error() = {
+      val y = 8
+      def foo() = {
+        val x = y // Will complain here
+        val y = 2
+        x
+      }
+      foo()
+    }
+    
+    /* Why care? Mutually recursive functions! 
+     * 
+     * val x = y // won't work
+     * val y = x
+     * 
+     * Thinking in terms of sex, uh sets:
+     * 
+     * X = Y U {a}
+     * Y = X U {b}
+     * 
+     * So we get X = Y = {a,b}. Scala does not allow this
+     * 
+     */
+    
+    def mutability() = {
+      var n = 0
+      def X() = {
+        n = 1 // Chase n up to the upper environment and change it there. Think of this as a setter
+      }
+      def Y() = {
+        var n = 2
+        X()
+      }
+      X() // This function call creates an environment
+    }
+    
+    // env: stack following func calls
+    // parent env: where func is defined
+    
+    // look-up symbol: follow parent pointers
+    
+    
+    /* Dynamic scoping:
+     * Our parent likners are based on the *current* env, not where func was defined
+     */
+    
   }
   
 } // end Food
