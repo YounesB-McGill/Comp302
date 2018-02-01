@@ -1041,5 +1041,19 @@ res17: Int = 15
     }
   }
   
+  /**
+   * You will make your own (functional) language!
+   * Must be very formal.
+   * Formal spec → implementation
+   * Formal spec has the syntax (representation)
+   * and semantics (what it means to execute it). We'll do this later
+   * 
+   * Programs are massive symbols, could be a UTF-8, ASCII, or even a picture!
+   * We have a stream of characters that can be compiled into something that can be executed 
+   */
+  def LanguageConstruction() = {
+    
+  }
+  
   
 } // end Food
