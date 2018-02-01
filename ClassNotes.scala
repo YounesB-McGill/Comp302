@@ -931,9 +931,74 @@ res17: Int = 15
     
     
     /* Dynamic scoping:
-     * Our parent likners are based on the *current* env, not where func was defined
+     * Our parent linkers are based on the *current* env, not where func was defined
      */
     
+  }
+  
+  // Thu 1 Feb 2018
+  
+  def recrusiveScoping()={
+    def fact(n: Int): Int = {
+      if(n==0) 1
+      else fact(n-1)*n
+    }
+    fact(2) 
+    
+    // Here's what happens in that method call:
+    /*
+     * Global environment (GE)
+     * fact
+     * 
+     * fact(2), points to GE
+     * n = 2
+     * 
+     * fact(1), points to GE
+     * n = 1
+     * 
+     * fact(0), points to GE (All point to GE)
+     * n = 0
+     * 
+     * This is NOT the same as the callstack. This depends only on scome
+     * 
+     */
+    
+  }
+  
+    /**
+     * When we execute code, we need the code itself, and 
+     * and environment, and its parent, grandparent, ggp...
+     * 
+     * But what if we have all the ancestors? Then we can package things in a way to 
+     * make things (funcs).
+     * 
+     * In a function, we have <parameters+body , environment where it is invoked >
+     * We call this <> a CLOSURE.
+     * 
+     * Do not confuse this with a continuation, which is something (code bodies + environment)
+     * that happens after the func
+     */
+  def closures() = {
+    // In GE, define addMaker (param + body)
+    def addMaker(x: Int): (Int) => Int = {
+      (y: Int) => {x + y} // anonymous function
+    }
+    // When addMaker is called, we create an addMaker environment which has GE as a parent
+    // Inside the addMaker environment, we define the anonymous func
+    val add11 = addMaker(11) // bound to anonymous function
+    add11(3) //14
+    // This runs by creating an add11 envr, whose parent is addMaker
+    
+    // forbidden vars!
+    var x = 8
+    // Define in GE
+    /** Constructs a new function and returns it */
+    def incMaker() = {
+      () => {x = x + 1}
+    }
+    // create new envr for incMaker, whose parent is GE
+    val s = incMaker()
+    x
   }
   
 } // end Food
