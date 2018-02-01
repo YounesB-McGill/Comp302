@@ -999,6 +999,47 @@ res17: Int = 15
     // create new envr for incMaker, whose parent is GE
     val s = incMaker()
     x
+    
+    // Use encapsulation of local data ??? to closures
+    // Returns a pair of things (a getter and setter)
+    def makeObj() = {
+      var name = ""
+      // Getter     and       setter
+      ( () => {name}, (n: String) => {name = n} )
+    }
+    
+    val n1 = makeObj()
+    
+    // Invoke setter
+    n1._2("Clark")
+    // Getter
+    n1._1() // Gets Clark
+    
+    def hMaker() = { // Never do this!
+      var words = Array("hello", "hi", "yo")
+      var helloF = new Array[() => String](3) // Array of functions
+      var i = 0
+      while (i < 3){
+        helloF(i) = () => (words(i))
+        i = i + 1 //↑ This is the function helloF(0,1,2)
+      }
+      helloF
+    }
+    def allHellos = hMaker() // hMaker envr
+    allHellos(0)() // Fails! This is because the environment is wrong. i has been incremented
+    
+    def hMaker2() = {
+      val words = Array("hello", "hi", "yo")
+      // Each version has its own environment
+      (for(i <- 0 until 3) yield { () => (words(i)) }).toArray // can still be improved
+      /**
+       * GE:
+       * 0: creates an environment for anon, which creates another envr
+       * 1: creates an environment for anon, which creates another envr
+       * 2: creates an environment for anon, which creates another envr
+       * */
+    }
   }
+  
   
 } // end Food
