@@ -1101,7 +1101,8 @@ res17: Int = 15
     // Matching numbers is usually easy, but should we allow 000007?
     // Matching identifiers 
     val id = "^[_a-zA-Z][_a-zA-Z0-9]*".r 
-    val key_val = "^val".r
+    val key_val = "^val\b".r // \b means boundary of a word
+    // In the Alice example we did "\\s+". First \ is
     
   }
   
