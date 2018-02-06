@@ -1052,6 +1052,56 @@ res17: Int = 15
    * We have a stream of characters that can be compiled into something that can be executed 
    */
   def LanguageConstruction() = {
+    // Tue 6 Feb 2018: 2 interviews tmw!
+    /* Languages have special values called tokens.
+     * Some are keywords like val, for...
+     * Some are identifiers, like method and variable names, eg to
+     * There r rules to see if sth is a token or not, like = vs ==, so we need to look ahead 
+     * We have to do this recursively, ie no C style iteration
+     * Recognizing patterns will be done using regex, to find/match tokens
+     * Our scanner will take a stream of chars. It'll branch off and look for every possible regex
+     * in the language, eg does this mean "val" or identifier, or whitespace, then it emits tokens
+     */
+    
+    // Regular expressions
+    /* Language for recognizing patterns. Power comes from simplicity (ltd expressiveness)
+     * Definition: A regex (re) is:
+     * 0) empty string, which we'll symbolize with epsilon
+     * 1) A single character, like 'a', 'b', ':',...
+     * 2) If R1 and R2 are regexes, then the concat R1R2 is a re // recursive definition
+     * 3) If R1 and R2 are regexes, then R1|R2 is a choice re // recursive
+     * 4) If R1 is a re, then so is R1*, where * is the Kleene star, for 0 or more repitions
+     * 
+     * Does "x|y*" mean "x|(y*)" or "(x|y)*"? So use brackets in case of ambiguity
+     * "a|b" matches "b", "c" and "a" don't match
+     * "(abc)*" matches "", "abc", "abcabc"
+     * if we want at least one abc: (abc)(abc)*
+     * 
+     * Extra sytax: makes life less awkward. We'll use these later
+     * Plus operator (abc)+ = (abc)(abc)*
+     * 0 or 1 of a string: (abc)? = (abc)|epsilon
+     * Any lowercase char: [a-z] = a|b|c|...|y|z 
+     * Any alphabetic char: [a-zA-Z] = a|b|c|...|y|z|A|B|...|Z
+     * Any char from this set: [aqwf3!]
+     * Anything except a-z: [^a-z]
+     * To re the dash symbol: Put at beginning or end: [abc-]
+     * whitespace [w\n\t\r] \s for any whitespace.
+     * Escape sequences
+     * Anchors ^ start of str, $ end of str, eg ^abc$
+     */
+    val numberPattern = "[0-9]+".r // .r is the Scala operator to convert to a regex
+    // To seach for this pattern in a String:
+    numberPattern.findAllIn("abc 123 8 ppp 8") // finds 123, 8, 8123. Returns a non-empty iterator, which we can convert toArray()
+    numberPattern.findFirstIn("abc 123 8 ppp 8") // returns Some(123)
+    numberPattern.findAllIn("abc ppp") // returns None
+    // So we get an Option[String], either Some(thing) or None. These are subclasses of the case class
+    numberPattern.findFirstIn("abc 123 8 ppp 8") match {
+      
+    }
+    // Matching numbers is usually easy, but should we allow 000007?
+    // Matching identifiers 
+    val id = "^[_a-zA-Z][_a-zA-Z0-9]*".r 
+    val key_val = "^val".r
     
   }
   
