@@ -1077,7 +1077,7 @@ res17: Int = 15
      * "(abc)*" matches "", "abc", "abcabc"
      * if we want at least one abc: (abc)(abc)*
      * 
-     * Extra sytax: makes life less awkward. We'll use these later
+     * Extra syntax: makes life less awkward. We'll use these later
      * Plus operator (abc)+ = (abc)(abc)*
      * 0 or 1 of a string: (abc)? = (abc)|epsilon
      * Any lowercase char: [a-z] = a|b|c|...|y|z 
@@ -1102,9 +1102,68 @@ res17: Int = 15
     // Matching identifiers 
     val id = "^[_a-zA-Z][_a-zA-Z0-9]*".r 
     val key_val = "^val\b".r // \b means boundary of a word
-    // In the Alice example we did "\\s+". First \ is
+    // In the Alice example we did "\\s+". First \ is to esc the backslash, then '\s' is for a space, followed by a +
     
-  }
+    // Convert a language stream to tokens, using regex. See java.ulil.regex.Pattern since that's what Scala delegates to
+    
+    // To build a Scanner, test against all regex and branch based on possibilities
+    // Some tokens overlap, ie val vs value
+    
+    def patternMatch1() = {
+      val re_id = "^[_a-zA-Z][_a-zA-Z0-9]*".r // regex for an identifier, ^[_a-zA-Z][_a-zA-Z0-9]*
+      val re_ws = "^\\s+".r // regex for whitespace, ^\s+. Note the one \ here
+      
+      def scan(input: String, tokens: List[String]): List[String] = {
+        if(input=="") tokens
+        else{
+          re_ws.findFirstIn(input) match {
+            case Some(x) => return scan(input.substring(x.lenghth), "WS"::tokens)
+            case None => // do nothing
+          }
+          re_id.findFirstIn(input) match {
+            case Some(x) => return scan(input.substring(x.lenghth), "ID(" + x + ")" ::tokens)
+            case None => // do nothing
+          }
+          // ...
+          
+          // If we get a garbage char
+          "ERROR"::tokens
+        }
+        
+        scan("foo bar      ping  ").reverse // recursion will give us a backwards string
+        
+        // Take Comp330/520 for better ways to do this
+        
+       
+      }
+    }
+    
+    // 2nd part of language is the PARSER
+    // program will have var declarations, eg 
+    var vardecl = 0
+    def functiondecl_id ( paramList: Int ) = { /* expression */ } // Not actually an Int
+    // expression breaks down into list of expressions
+    
+    // Use BNF (Backus-Naur Form) grammars, we'll use CFG (context-free grammar)
+    // List of rules, some may be recursive, composed of symbols=identifiers, which can be terminal or not.
+    // Rule: LHS (non terminal) ::= RHS (list of term/nonterm)
+    // every non term must be on atl one LHS
+    
+    // example
+    //for (foo <- (1 to 10)) yield foo
+    
+    // forStmt ::= FOR "(" ID "<-" expr ")" YIELD expr
+    // Grammar does not tell us if prog is correct, it just give the format. We can't know just using grammar if sth is an iterator or not
+    // so we just say expr
+    
+    // expr ::= binexpr | unexpr | fncall | ifexpr | ...
+    // OR
+    // exper ::= binexpr; exper ::= unexpr; ...
+    
+    // blockexpr ::= "{" exprList "}"
+    // exprList ::= expr exprList | e // e is epsilon, ie nothing
+    
+  } // end language construction
   
   
 } // end Food
