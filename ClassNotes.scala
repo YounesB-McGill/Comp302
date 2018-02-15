@@ -1101,6 +1101,9 @@ res17: Int = 15
     // Matching numbers is usually easy, but should we allow 000007?
     // Matching identifiers 
     val id = "^[_a-zA-Z][_a-zA-Z0-9]*".r 
+
+    
+    
     val key_val = "^val\b".r // \b means boundary of a word
     // In the Alice example we did "\\s+". First \ is to esc the backslash, then '\s' is for a space, followed by a +
     
@@ -1162,6 +1165,137 @@ res17: Int = 15
     
     // blockexpr ::= "{" exprList "}"
     // exprList ::= expr exprList | e // e is epsilon, ie nothing
+    
+    // Feb 15
+    
+    //....
+    
+    // 13:13 Now we're using Int to make a calculator
+    
+    // { case _ ~ e ~ _ => e } // if I get sth I don't care abt (_), return the expr as an Int without brackets
+    // t is for term, recursive
+    // Specify constants with caps, like Minus, so Scala will assume that it's a constant
+    // last expr case is to avert compiler warnings
+   
+    /*
+    def term: Parser[Int] = factor ~ rep(Times ~ factor)^^{
+      case f ~ list => f * list.map((x) => x._2).product // throw away extra times symbols we don't need
+      // product is built-in
+    }
+    // factor removes ()
+    
+    // Invoke like this:
+    // val p = new ExprParser(); p.parseAll(p.expr,"3*4+1-2").get
+    
+    */
+    
+    // In assignment, use a tree structure based on this hierarchy:
+    abstract class ASTNode // That's it! No body
+    case class ASTNumber(val value: Int) extends ASTNode // That's it! case keyword is optional here
+    case class ASTBinOp(val op: String /* + - or * */, val right: ASTNode, val left: ASTNode) extends ASTNode
+    // case indicates a deeper meaning than regular inheritance
+    
+    
+    // In 3rd parser, we use these ASTNodes
+    
+    // Case class. An Option is either Some or None
+    
+    /* Consider this case:
+    
+          (f)         (*,TreeNode)::(*,TreeNode)::Nil // TreeNode = 🦑
+         /   \
+         
+         Gets converted to this List: (f)::🦑::🦑::Nil
+         
+                          binOp
+                         / \  \
+                      binOp 🦑 🦑  
+                       / \  
+                      binOp 🦑
+                          \...
+        ASTBinOp(-,ASTBinOp(*,ASTNumber(3),ASTNumber(2)),ASTNumber(1)) // This is just like Comp250 ExpressionNode
+        
+                  -
+                /  \
+               *    1
+             /   \ 
+            3     2
+    */
+    
+    def pp(a: ASTNode): String = { // pretty printer
+      a match{
+        case ASTNumber(n) => n.toString
+        case ASTBinOp(op,left,right) => "(" + pp(left) + op + pp(right) + ")" // left assoc eg 1*2*3 = (1*2)*3 since we used reduceLeft
+      }
+    }
+    
+    // That's a nice way of validating/fixing things
+    
+    // Expression parser is boring, so we'll make a new functional lanuguage using a functional langugae! WML
+    // Wiki markup language. Format webpages in convenient nice syntax for an HTML page
+    // Use a simplified restricted form, known as Wikitext. Standardization is still being attempted
+    // We will use MediaWiki's style to make a platform for non-technical users to make wiki pages for TV shows, games etc
+    // We will make commands from unlikely char sequences
+    /* In HTML, "abc\ndef" -> "abc def", but "abc\ndef\n" -> <p>abc</p>
+    *x *y means <ul><li>x</li><li>y</li></ul> 
+    */
+    
+    // We're more interested in the template language. Eg, The way we describe Simpsons characters should be the same
+    // gamepedia.com. Infobox on the rite. Can edit page to view source
+    /* example: Beer (https://elex.gamepedia.com/index.php?title=Beer&action=edit)
+    
+    {{Infobox inventory
+    | name = Beer
+    | icon = Icon_Food.png
+    | image = Icon_beer.png
+    | size = 60px
+    | desc = Brewed using whatever came to hand, this doesn't come closes to complying with any purity law.
+    | inventory = item
+    | slot = food
+    | cost = 10
+    | value = 2
+    | health = +10
+    | duration = 10
+    }}
+    
+    {{ is reserved so {{ foo }} will find the page called foo, copyingt the contents -> "transclusion"
+    
+    Parameters:
+    {{ foo | blah | yadda | /*emptyString/ }} // treat this like a function call
+    
+    bar 
+    Hello {{ nameify | Clark | Verbrugge }}
+    
+    namify 
+    Mr {{{1}}} {{{2}}} // These are parameters refered by index number
+    But if we do {{{8}}}, it won't crash or give an error, so it will just return {{{8}}}
+    example: Mr {{{1}}} {{{8}}} gives "Mr Clark {{{8}}}"
+    
+    We can also name our parameters, eg Hello {{ nameify | first=Clark | last=Verbrugge }}
+    In nameify: Mr {{{first}}} {{{last}}}
+    
+    In wikis, this falls short of a programming language.
+    What would happen if foo transcluded itself?
+    foo {{ foo }} is banned! Can't do recursion directly
+    
+    Also, there is no real scoping model. Nor can we pass functions and envrionments or make anonymous pages
+    
+    So we're gonna fill in these gaps by making a real functional language! WML
+    
+    We won't use the wiki param passing. Instead, we will do this:
+    {{ foo | bar | ping }}
+    
+    foo: abc, def
+        {{{ ab }}}
+        
+    We will do this in a file (like a page)
+    So special synatx for defining templates. Everything lives in the same file!
+    
+    In order to do this, we need a grammar. See A2
+    
+    
+    */
+    
     
   } // end language construction
   
