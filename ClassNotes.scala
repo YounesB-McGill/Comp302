@@ -1354,9 +1354,60 @@ res17: Int = 15
     // But still want convenience, eg convert {{  foo }} to {{foo}}. In template names, args, param names etc we trim whitespace
     
     // At compile time, this works: {'foo || hello'}{{bar}}, but then we'll get a runtime error
-    {'foo||'} {{ {{foo}} }} // foo has an empty body, so when we invoke it, we get {{  }}, then whitespace is trimmed and we get {{}} → error!
+    // foo has an empty body, so when we invoke it, we get {{  }}, then whitespace is trimmed and we get {{}} → error!
+    {'foo||'} {{ {{foo}} }}
     
+    // A2 language is related to a theoretical construct
+    We parse to make an AST
+    // fix the version I gave you due to bad copy/paste. It would right (→) some parts
     
+    To evaluate WML, recursively eval the AST. Take in nodes and generate text Everything is a map eval → string (for now)
+    
+    {{ foo{{bar}} | arg1{{{p1}}} | {{ping}} | }} // eval to 
+    
+    {{ // root of AST
+      foo{{bar}} // name. Do lookup to find what it is. Build an envr
+      | arg1{{{p1}}} // eval arg1
+      | {{ping}} 
+      | // "eval" empty string
+    }}
+    
+    // In lookup, see if object is envr, else ...
+    
+    // Definition is not an execution
+    // Body is not evaluated at fct def. Only executed when function called. Body is still an AST
+    
+    // We will use static scoping
+    
+    As we begin, start w an outer env EO
+    every eval: eval(ASTNode, env) → String
+    'Weird' concession: we will allow ENV to be modified :(
+    
+    Outermost level is a sequence of (OUTERTEXT | <invoke> | <define>)*
+    
+    To eval(OUTERTEXT, env) → OUTERTEXT // env has symbol mappings. Text is a constant regardless of env
+    
+    eval(list, env)
+    if(list==null) ""
+    else head::tail → let r eval(head,env) and then return r + eval(tail,env) // env may be modified!
+    
+    For other things, we follow the (recursive) structure of AST node
+    
+    eval(invoke(itext,args),env)
+    
+    foo(1+2, a+b, c++, ++c) → foo(3, concat/add a and b, uh-oh!) 
+    Do we eval c++ then ++c or the other way around? In Java, left to right. In classic C, order is unspecified!
+    
+    In our language, we'll do it left to right. This important as we can do just-in-time defs:
+    {{ foo{'bar||ping'} | {{bar}} }}
+    
+    So eval itext recursively in our current env, this returns a name. We will then eval arguments as strings
+    
+    Lookup in env our name. We should find a binding. Attached to name is [params, AST body and env]
+    If not found, check parent. Repeat as necessary. If not found, say "Template not found!" Don't let program crash!
+    
+    Assume binding found. Pass args, create a new env E1. As a parent, we point to EO (where function was defined)
+    Then eval AST body: eval(Body, E1) // return string from invocation
     
     */
     
