@@ -1329,6 +1329,35 @@ res17: Int = 15
     
     VNAME ::= anything, except PIPE(s), VEND // We will not allow nesting in param names
     
+    // Now add defs to make a full language!
+    <define> ::= DSTART <dtextn> <dparams> PIPES <dtextb> DEND
+    <dtextn> ::= (INNERDTEXT | <invoke> | <define> | <tvar>)* // * means list of 0 or more, so we can have anonymous templates/functions
+    <dparams> ::= (PIPE <dtextp>)* // dtextp is never empty
+    <dtextp> ::= (INNERDTEXT | <invoke> | <define> | <tvar>)+ // + Do not allow empty parameter names, so after | must have something
+    <dtextb> ::= (BODYTEXT | <invoke> | <define> | <tvar>)* // function can have empty body
+    
+    
+    
+    Here is "Hello World" in our language {'foo || hello'}{{foo}}
+    
+    // Change to allow defs:
+    <itext> ::= (INNERITEXT | <tvar> | <invoke> | <define> )*
+    
+    INNERDTEXT = anything, except for TSTART, DSTART, VSTART, PIPE(s), DEND
+    BODYTEXT = anything, except TSTART, DSTART, VSTART, DEND
+
+    // Lot of overlap between tokens, eg | vs ||, {{ vs {{{, so what does {{{{{{ mean? {{ {{ {{ or {{{ {{{ or {{{ {{ { or { {{ {{{?
+    So we have to prioritize mathcing VSTART over TSTART, so {{{ {{{. We can use spaces to make them look like TSTARTS
+    
+    WHITESPACE IS IMPORTANT IN OUR LANGUAGE!
+    
+    // But still want convenience, eg convert {{  foo }} to {{foo}}. In template names, args, param names etc we trim whitespace
+    
+    // At compile time, this works: {'foo || hello'}{{bar}}, but then we'll get a runtime error
+    {'foo||'} {{ {{foo}} }} // foo has an empty body, so when we invoke it, we get {{  }}, then whitespace is trimmed and we get {{}} → error!
+    
+    
+    
     */
     
     
