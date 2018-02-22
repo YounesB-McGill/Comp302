@@ -1293,6 +1293,41 @@ res17: Int = 15
     
     In order to do this, we need a grammar. See A2
     
+    */
+    
+    /*
+    Thu 22 Feb 2018
+    In grammar.txt, ALL CAPS words like TSTART are tokens
+    
+    It helps to build up incrementally.
+    
+    Start with nothing, ie we only have arbitary text
+    
+    Now add this line:
+    <program> ::= OUTERTEXT
+    OUTERTEXT = anything // This is the most rudimentary language possible (base case)
+    
+    Let's add invocations (like {{ foo | arg1 | arg2 }});
+    <program> ::= (OUTERTEXT | <invoke>)* // some sequence of OUTERTEXT and invocations
+    OUTERTEXT = anything except for TSTART // have to change this so {{}} are not absorbed
+    
+    <invoke> ::= TSTART <itext> <targs> TEND
+    <targs> ::= (PIPE <itext>?)* // ? because we could call sth like foo("") or {{ foo||| }}
+    <itext> ::= (INNERITEXT | <invoke> )* // very important when or not sth can be empty
+    
+    // At this point we can do nested invocations:
+    {{ foo {{ bar }} | arg1 {{ ping }} |
+    
+    INNERITEXT = anything, except TSTART, PIPE(s), TEND // TSTART allows for recursion
+    
+    
+    // Now let's add parameters:
+    <itext> ::= (INNERITEXT | <tvar> | <invoke> )* // <tvar> is {{{param}}}
+    INNERITEXT = anything, except TSTART, VSTART, PIPE(s), TEND // VSTART is {{{
+    
+    <tvar> ::= VSTART VNAME (PIPE <itext>)? VEND // {{{ f | x }}} x can be an itext or invocation. This allows for recursion.
+    
+    VNAME ::= anything, except PIPE(s), VEND // We will not allow nesting in param names
     
     */
     
