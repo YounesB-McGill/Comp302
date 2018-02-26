@@ -274,7 +274,7 @@ body
 }
 
 
-for (i <- "Hello" ) println(i)    // what the fuck is this language
+for (i <- "Hello" ) println(i)    // what the f*** is this language
 H
 e
 l
@@ -284,7 +284,7 @@ o
 }
 
 
-for( i <- "cdt" ; v <- "aeo" ; d <- "bx") println("."+i+v+d) // nested for loops this is retared
+for( i <- "cdt" ; v <- "aeo" ; d <- "bx") println("."+i+v+d) // nested for loops this is r******
 .cab
 .cax
 .ceb
