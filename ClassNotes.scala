@@ -1584,6 +1584,10 @@ res17: Int = 15
     
     sillyAdd(3,4) // returns 3 + 4 + 1*9
     
+    
+    // We need to be able to return Closures and anon functions
+    
+    
   } // end language construction
   
   
