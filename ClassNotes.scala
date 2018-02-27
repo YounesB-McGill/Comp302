@@ -2,6 +2,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
 import scala.util.Sorting.quickSort
 
+import scala.reflect.runtime.universe
+import scala.tools.reflect.ToolBox
+
 object Food {
   def main(args: Array[String])={
     println("Hi!")
@@ -1411,6 +1414,175 @@ res17: Int = 15
     
     */
     
+    // Tue 27 Feb 2018
+    // .. Missed first 5 min
+    
+    /* 
+    Evaluate parameters
+    eval name, param → name
+    lookup value of param. eval(optionalPart, env) → optionalPart if we don't find in parent(s). If never found it will 
+    show "{{{paramname}}}". Here we're just looking up the binding
+    
+    AST node does NOT know about env. That happens when we parse things.
+    
+    Envs are like boxes, each box points to parent
+    
+    Evaluate definitions:
+    eval( define(dtextn, dparams, dtextb), env ) // dparams can be empty
+    for each param in dparams:
+      eval(dparam, env) // DO NOT eval the body (dtextb) here! This is a deviation from before
+      
+    function binding is a list of parameters, and the body as an AST node. Keep track of environment. This is the only place in the 
+    course where we can change things (ie change environment only)
+    
+    define → "" (empty str) // eval to side effect which is changing the env // THIS IS ASSISGNMENT 3!
+    
+    {'foo||hello'} {{foo}}
+    
+    // now recursively:
+    "{'foo||{{foo}}'}{{foo}}"
+    cr root env E0. Invoke foo, cr new env E1, which calls foo. foo is def'ed in E0. So in the end we have E1..INF all pointing 
+    to E0. We must be able to handle computation and conditionals in order to implement recursion.
+    
+    We must do something like:
+    {{#expr | 3+4+2/7}} // built-in template → | any → expression.
+    
+    We could make a whole subgrammar for this, but instead we'll cheat by using Scala reflection!
+    
+    This is a security risk in general, but we'll allow it for limited use cases (do simple math)
+    */
+    val tb = universe.runtimeMirror(getClass.getClassLoader).mkToolBox()
+    tb.eval(tb.parse("3*4-2-1")).toString // returns Any so we change it toString
+    tb.eval(tb.parse("3<4")).toString // returns "true"
+    
+    /*
+    Conditionals
+    
+    MediaWiki has the format {{ #if | cond | thenpart | elsepart }} 
+    or (wo elsepart)         {{ #if | cond | thenpart | elsepart }}
+    
+    if cond evaluates to "", cond is false, else cond is true
+    
+    Another form:
+    {{ #ifeq | A | B | thenpart | elsepart }}
+    if(A==B)
+      thenpart
+    else
+      elsepart
+      
+    Example: factorial:
+    {'fact|n||{{#ifeq|{{{n}}}}|0|1
+    |{{#expr|{{{n}}} * {{fact|{{#expr|{{{n}}} - 1 }} }} }} }}'}
+    
+    This will run forever! eg fact(2) will call fact(1) and then fact(0) Aha!
+    This will call fact(-1), fact(-2) then discard them
+    
+    So we have to eval if statements differently. We will eval the condition, THEN only one of (thenpart or elsepart) 
+    
+    → Eval if lazily. 
+    We eval'd args eagerly before, since we may have needed them.
+    
+    → Eval cond eagerly, eval thenpart/elsepart lazily
+    
+    Most langs (including Scala) do this by call-by-value
+    foo(arg1) calls foo(x: Int): Int. 
+    
+    Comp202 review (Java):
+    int arg1 = 7;
+    
+    int foo(int x){
+      x = 1; // Does not affect arg1
+      return 0;
+    }
+    
+    In C++, use &x to use call-by-reference
+    
+    In lazy eval, we wait until we have to.
+    2 ways in Scala:
+    
+    Call-by-name: Give param a type => Sometype
+    
+    */
+    
+    def foo27(i => Int) = { // wrapup argument as a function
+    }
+    
+    def stuff27(s: String): Unit = { println("Hi from" + s) }
+    
+    def ourConditional(condition: Boolean, thenPart: Unit, elsePart, Unit) = {
+      if(condition) thenPart
+      else elsePart
+    }
+    
+    ourConditional(true, stuff27("then side"), stuff27("else side"))
+    /* prints
+    Hi from then side
+    Hi from else side
+    */ 
+    
+    def ourConditional2(condition: Boolean, thenPart: => Unit, elsePart, => Unit) = { // similar to macro replacement
+      if(condition) thenPart
+      else elsePart
+    }
+       
+    ourConditional2(true, stuff27("then side"), stuff27("else side"))
+    /* prints
+    Hi from then side
+    */
+    
+    // Be careful with side effects:
+    val x = 8 // global var
+    def ourConditional3(condition: Boolean, thenPart: => Unit, elsePart, => Unit) = {
+      val x = 99
+      if(condition) thenPart
+      else elsePart
+    }
+    
+    // method call:
+    ourConditional3(
+      true,
+      {println("Then side and x is" + x)},
+      {println("Else side and x is" + x)}
+    )
+    // Prints Then side and x is 8. This is outside fct
+    
+    // Disadvantage is that when we the same thing multiple times, it will be repeatedly eval's
+    def maybeTranslate(condition: Boolean, coord: (Int, Int), y => Int): (Int, Int) = {
+      if(condition)
+        0 // translate
+      else
+        coord
+    }
+    
+    def numsFrom(n: Int): List[Int] = {
+      n::numsFrom(n+1) // StackOverflow!
+    }
+    
+    // Use a Stream
+    def numsFrom(n: Int): Stream[Int] = {
+      n #:: numsFrom(n+1)
+    }
+    
+    numsFrom(4) // returms Stream(4, ?)
+    numsFrom(4).tail // returms Stream(5, ?)
+    numsFrom(4).tail.tail // returms Stream(6, ?)
+    
+    
+    // Call-by-need is like a cached version: evals at most once
+    
+    // This causes no errors
+    def safeDivide(x: Int, y: Int) = {
+      lazy val r = x/y
+      if(y == 0) "undefined"
+      else r.toString
+    }
+    
+    def sillyAdd(x: Int, y: Int) = {
+      lazy val r = { println("hello"); 9}
+      (x+r, y+r)
+    }
+    
+    sillyAdd(3,4) // returns 3 + 4 + 1*9
     
   } // end language construction
   
