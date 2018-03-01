@@ -34,10 +34,119 @@ object ClassNotes2{
     Definition of x includes y||foo. We'll allow this as "  x  " + "", ie we treat {'y||foo'} as "", and we bind y to "",
     so {{y}} is foo.
     
+    // mix of Scala and pseudocode
+    
+    eval("abc", env) → ("abc", null)
+    eval(program (list), env) 
+      if(list==Nil) return ("", Nil)// Base case
+      else list == head::tail
+      let r = eval(head, env)
+      and t = eval(tail, env)
+        return (r._1 + t._1); 
+        if(t._2==null) r._2
+        else t._2
+    
+    eval(  ..(itext, arg1), env)
+      let name = eval(itext, env) // eval the args
+      if(name._1.trim()=="")
+        invoke name._2 // ie the function
+      args → evaluation of pair(String, function)
+      
+    eval(tvar(vname, itext))
+      eval vname // Throwaway function, keep only the String (mechanism to allow closures)
+        lookup that Srting
+        if not found, eval the itext
+        
+    eval(define(dtextn, dparam, dtextb), env)
+      eval(dtextn, env) // must be String (perhaps trimmed), could be ""
+      if dtext → ""
+        return ("", function)
+      else
+        return ("", function) and add a binding
+      eval dparam too
+        Now String must not empty // Handle exception
+        return ("", function) // function is an object, RHS of a fct binding in an environment
+        
+     // That's the last part of WML we'll go over in detail
+     
+     
+     ______________________________________________________________________________________________________________
+     "Hard line across here"
+     
+     Closures:
+     A closure is a function + context
+     
+     foo() // invocation
+     
+     val x = 1
+     println("Hello")
+     bar()                    // This whole thing is the CONTINUATION of the foo() invocation
+     val y = 17               // We add context 
+     //...
+     // end of program
+     
+     Continuation Programming Style
+     We call fcts with an extra parameter (continuation + context) ← lazy eval!
+     call-with-current-continuation
+     
+     So we're NOT actually returning from a fct. Instead they invoke their cont, which invoke their cont...
+     
+     // example
+     foo() // pass cont w lazy eval
+     val x = 1
+     println("Hello")
+     bar()
+     val y = 17
+     
+     foo(cont: () => { // cont is a fucntion of everything below foo
+      val x = 1
+      println("Hello") // ignore this for now
+      bar(cont: () => {
+        val y = 17
+      }) // NB should be CPS
+     })
+     
+     At the end of foo, anywhere and everywhere it would retrun, it instead invokes the cont.
+     
   */
   
-  def foo{
-  }
+  def outerFunc() = {
+    
+    def foo() = {
+      println("foo")
+      val z = 8
+      z * z // return 64
+    }
+    val q = foo()
+    q * q
+    
+    /* Becomes:
+    def foo(c:(Int)=>Unit) = {
+      println("foo")
+      val z = 8
+      c(z * z)
+      
+    }
+    */
+    
+    def fact1(n: Int): Int = {
+      if(n==0) 1
+      else fact1(n-1) * n
+    }
+    
+    def fact(n: Int, c:(Int)=>Unit): Unit = {
+      if (n==0) 
+        c(1) // function ends
+      else { // no longer returning, n continuations for n levels
+        fact(n-1, (z) => { // create a new continuation
+          c(z * n)
+        })
+      }
+    }
+    // This is how we call this:
+    fact(5, (r) => { println(r) }) // This works IRL!
+    
+  } // end outerFunc
   
   
 }
