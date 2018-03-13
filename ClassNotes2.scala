@@ -220,8 +220,83 @@ object ClassNotes2{
     Assume left-assoc: MNP = (MN)P
     and λx.xyz = (λx.(xyz)) // Continue till u hit a bracket
     
-    */
+    Tue 13 Mar 2018
+    MN means function application, ie call sth, ie term rewriting
     
+    Beta-reduction: 
+    BODY is whatever happens after the dot
+    
+    (λx.x)y. First thing MUST be an abstraction (w a λ), so (λx.x)y means Identity Function applied to y,
+    so result of (λx.x)y is y.
+    
+    Formally, this is a rewriting process (wo worrying abt scopes, envr, ...)
+    
+    (λx.M)N → M[x→N] // map every x to N
+    
+    eg (λx.x)y → x[x→y] // change every x to y
+    (λx.x(λz.w))y → x(λz.w)[x→y] = y(λz.w)
+    
+    (λx.xx)y → xx[x→y] → yy // take the body xx, then replace every x with y
+    
+    A bit trickier if we have a lot of nesting if stuff is being redefined:
+    (λx.x(λx.x))y // Different x's! First two and last two don't refer to the same thing, so:
+    (λx.x(λx.x))y → x(λx.x)[x→y] = y(λx.x) // Only look at OUTSIDE. Inside is SHADOWED so it should not be touched
+    
+    In Scala:
+    */
+    def foo(x: Int, y: Int) = {
+      def bar(x: Int) = {
+        x + y // x comes from bar, y comes from foo
+      }
+    }
+    /*
+    This works the way we expect from nested function calls
+    
+    We can distinguish between x's bsed on whether there is a lambda in font of them.
+    
+    As a rewrite system, we need to know what is free from what is bound
+    
+    Recursive definition:
+    1. x is free in x // Base case
+    2. if F is a set of free variables in term M // inductive step
+          then F - {x} is free in (λx.M)
+    3. if F is a set of 3 variables in M and G is a set of 3 variables in N
+          then F U G is free in application (MN)
+    4. What is not free is bound
+    
+    // example for 2:
+    x is free, λx.x is not free. This is backwards from what we are used to. Write the body first, then see what is free or not.
+    
+    // Big example:
+    (λx.z(λq.qz)(λz.xq)x)
+    
+    q is free in q, z free in z, x free in x // base cases
+    
+    Buildup with induction. Start with innermost:
+    {q} is free in q AND {z} is free in z → {q, z} is free in qz
+    {q, z} is free in qz → {q, z}-{q}={z} is free in (λq.qz)
+    
+    Formally, beta reduction uses this free/bound distiction, but we understand it already.
+    
+    (λx.BODY)N
+    When we beta reduce (MN), watch out for implicit brackets!
+    
+    eg (λx.x(λy.y)w)z // nb: ((λx.n)N) is a redex → M[x→N] is a contraction
+    
+    → (λx.{x(λy.y)}w)z // implicit () written as {}
+    
+    Sometimes we get stuck if we apply beta-reduction
+    
+    (λx.x((λx.x)y))z // 2 redexes
+    
+    Inner: (λx.x(y))x → zy
+    
+    
+    
+    
+    
+    
+    */
     
   } // end outerFunc
  
