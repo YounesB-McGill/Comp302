@@ -289,7 +289,48 @@ object ClassNotes2{
     
     (λx.x((λx.x)y))z // 2 redexes
     
-    Inner: (λx.x(y))x → zy
+    Inner: (λx.x(y))x → zy...
+    
+    Churh-Rossa thm = Diamond property, Confluence shapee
+    
+    M →* N, M →* P, where →* is some set of reductions, ie order does not matter
+    then there exists a Q st N →* Q, P →* Q.
+    
+    This does NOT guarantee normal from exists, but if normal reduction terminates, then there is a unique normal form
+    
+    We can rename variables to make life easier: λx.x = λy.y
+    
+    Some terms indeed never terminate under beta reduction:
+    ω = (λx.xx), Ω = ωω. Beta reduce Ω: xx[x→(λx.xx)] = (λx.xx)(λx.xx) = Ω → Ω → Ω → ... // stable
+    
+    w = (λx.xxx) // remember everything is left associative
+    ww = (λx.xxx)(λx.xxx) 
+       = (λx.xxx)(λx.xxx)(λx.xxx)
+       = ww(λx.xxx) = www → wwww → wwwwww → ... // infinitely growing!
+    
+    Does the order in which we do the redexes matter?
+    If a solution is possible, we'll get there, but not all solutions are equally efficient!
+    
+    F = (xx.(λy.y)) can be written as λxy.y // Throw away 1st arg, do 2nd. This is in curry form!
+    
+    {F(ww)}I → I // I is the identity
+    
+    If we expanded x instead, we'll be wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww forever!
+    But if at some point we stop, we can throw them all out and get I. Moral is eval things lazily, not eagerly! 
+    
+    So do the leftmost, outermost reduction first!
+    
+    How do we do computations in λ caluculus?
+    Encode integers as functions! Church numerals:
+    0 = λfx.x → (λf.(λx.x)) // zero applications of f
+    1 = λfx.(fx)
+    2 = λfx.f(fx)
+    3 = λfx.f(f(fx))
+    
+    
+    
+    
+    
     
     
     
