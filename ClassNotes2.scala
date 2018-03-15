@@ -328,6 +328,139 @@ object ClassNotes2{
     3 = λfx.f(f(fx))
     
     
+    Thu 15 Mar+ 2018
+    
+    // TODO first 30 min
+    
+    PLUS 1 2
+                        m         n
+    = (λmnfx.nf(mfx))(λgy.gy)(λhz.h(hx))
+    = λfx.(λhz.h(hz))f(`(λgy.gy)fx`) // `...` is fx
+    = λfx.(λHZ.h(hz))f(fx) // the last fx is bound to the Capital Z, the TODO 13:36 is bound to the H
+    = λfx.(λhz.h(hz))f(`(λgy.gy)fx`
+    =...
+    
+    MULT Doable: excercise!
+    
+    PRED: Difficult // Predecessor, eg PRED 2 is 1
+    
+    
+    CONDintionals?
+    We need lazy evals.
+    We need true and false values, in functional forms:
+    TRUE  = λxy.x // returns first argument
+    FALSE = λxy.y // this is zero
+    
+    Want if(cond) thenside; elseside // 3 args
+    cond must reduce to either TRUE or FALSE
+    
+    Notice symetry with defs of T/F.
+    So we can define:
+    IF = (λctf.ctf) // implicit brackets, t/f is true/false
+    
+    Need predicates like ISZERO // base case for many recursive functions
+    // this what is bound on:
+    //               f        x
+    ISZERO = λn.n(λx: FALSE)TRUE
+    
+    ISZERO 0 = (λn.n(λx: FALSE)TRUE)(λfx.x) // beta reduction
+             = (λfx.x)(λx.FALSE)TRUE // bind 0, throwaway f, returns 0; ; 
+             = TRUE
+             
+    ISZERO 2 = (λn.n(λx: FALSE)TRUE)(λfx.x) // any number w f will turn into false
+                              f      x
+             = (λfx.f(fx))(λx.FALSE)TRUE
+             
+             = (λx.FALSE)(FALSE... `dc much abt this`) 
+             
+    Logical AND: // 'cute'
+    AND = (λxy.xyx)
+    
+    AND tt = (λxy.xyx)tt = ttt = t // Remember TRUE is a function that returns 1 arg
+    AND tf = (λxy.xyx)tf = (λxy.xyx)(λxy.x)(λxy.y) = λxy.y = f
+    
+    We can also make ORs, etc
+    
+    // Equality of numbers
+    EQ(m, n) = AND(LEQ(m, n), LEQ(n, m))
+    
+    We still need to iterate, and will do that by 
+    RECURSION!
+    f(f(f(f(... x))))
+    
+    To build this, f will take itself as a parameter.
+    We can have terms that build recursions for us, called combinators.
+    Based on idea of fixed point
+    x = f(x)
+    f(f(x = f(x))) // No matter how many times we call f, we'll always get fixed point x
+    
+    We need a function F st: F(f) = f(F(f))
+    
+    Y-Combinator:
+    Y = (λf.(λx.f(xx))(λx.f(xx))) // try this out
+    This returns an infinite nested sequence that stops when fct says so
+    
+    Yg = g(Yg) = g(g(Yg)) = g(g(g(Yg))) = ... // expands forever 
+    
+    So we don't need to make a function recursive. We just wrap around a Y-Combinator
+    
+    if we want fct to stop:
+    g(r, n) = if(n==0) basecase; else r(n-1)
+    
+    Interesting Combinators:
+    Identity I = λx.x
+    True K = λxy.x
+    S = λxyz.xy(yz)
+    
+    We can represent lots of terms with just these three (I, K, S)
+    λx.xx = SII
+          = (λxyz.xy(yz))II
+          = (λyz.Iz(yz))I
+          = (λyz.z(yz))I
+          = λz.z(Iz)
+          = λz.zz // same as what we started with, by alpha substitution!
+    
+    We don't even need I:
+    
+    SKK = ((λxyz.xy(yz)))KK
+        = (λyz.Kz(yz))K
+        = λz.Kz(Kz) // Since K only returns the first arg, we dc abt the second Kz
+        = λz.z = I
+        
+   Exercice: Express λx.x(xx) using S, K, I
+   
+   We can express every lambda term with just S, K, (I).
+   We can build a computer this way, but maybe less efficient
+   We can make negative numbers by making pairs, like (-, 3), "Objects" which are n-tuples
+   
+   
+   
+   
+   
+   //  T Y P E S
+   Most practcial languages have types.
+   Often have static types, like in Java, eg String foo(Object o, ArrayList<String> a, ...)
+   
+   Nominative type system: Type name is important, eg int != char
+   Structural type system: What type allows
+        
+          
+          
+          
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     
