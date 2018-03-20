@@ -498,26 +498,140 @@ object ClassNotes2{
    What is 7.0 + 3? There is implicit conversion, not because an int IS a float, but we convert it. In many cases we can coerce 
    one type into another.
     
+    Type constructors are used to build new types. eg, */
+    enum day {sunday, monday, tuesday, wednesday, thursday, friday, saturday}
+    /*
+    We cannot do something like monday + 9
+    
+    In C, we were just defining constants:
+    #define monday 0
+    
+    Then monday + 2 is wednesday
+    
+    In Pascal, enus are types
+    
+    In C: An aggregate type:
+    struct point {
+      int x;
+      int y;
+      double z;
+    }
+    
+    In Scala:
+    */
+    class point{
+      x: Int
+      y: Int
+      z: Int
+    }
+    /*
+    A struct is layed out like this in memory:
+    [ x:  32 b] [ y:  32 b]
+    [ z:      64 b        ]
+    
+    Note that the memory is not always contiguous, for performance reasons:
+    [ x:  32 b] [   ///   ]
+    [ y:  32 b] [   ///   ]
+    [ z:      64 b        ]
+    
+    Aggregators also define types:
+    point: int x int x double // x is \times, type constructs for aggregation
+    
+    Unions (variants) // Don't worry too much abt this
+    
+    union number {
+      int i;
+      double d;
+    }
+    
+    Put stuff on top of each other
+    
+    number: int + double // This is OR instead of AND
+    
+    This is used to convert, eg float to int.
     
     
+    Arrays are type constructors
+    x: int[] // array of ints != int
+    
+    In many languages we have recursive types: In Java 
+    
+    class List{
+      int x;
+      List next;
+    }
+    
+    What is a List type? We know this an aggregation and List = int x List. But this cycle makes sense since we can know the size 
+    of the data
     
     
+    Functions have types too.
+    
+    int square(int x){
+      return x * x;
+    }
+    
+    What is the type of square()? Takes an int and returns an int, so we can write: int → int, 
+    where the arrow is a function type constructor.
+    
+    double[] foo(int x, String y){ 
+      return null;
+    }
+    
+    foo: int x String → double[]
+    
+    In Scala, we can have arrays of functions!
+    
+    Note that this still works with recursion:
+    
+    int fact(int n){
+      if(n==0) return 1;
+      else return fact(n-1)*n;
+    }
+    
+    fact: int → int
+    
+    In Comp302 we will use this notation: x, →, [].
+    
+    Simply typed lambda calculus: Done in 1940's
+    We could make base types in λ-calculus, eg int or boolean.
+    We only need 1 base type!
+    We'll use the phi symbol Φ, but u can replace it with int.
+    
+    Inductive contact types:
+    if s & t are types:
+      then s→t is a type
+    
+    eg: Φ, Φ→Φ, (Φ→Φ)→Φ, Φ→(Φ→Φ) // left assoc by default
+    
+    Each type has associative 
+    x:
     
     
+    A var of type t is a term of type t.
+    x^Φ has type Φ, x^(Φ→Φ) has type (Φ→Φ), x^whatever has type whatever
     
+    Application: if M is of type s→t, and N^s, then (MN)^t
     
+    Abstraction: if M^t and x^s, then (λx.M)^(s→t)
     
+    eg base case: x^0: 0, z^(0→0): 0→0
+    (λx^0.y^0): 0→0
+    ((λx^0.y^0)z^0): 0 // From rule above
     
+    Can we make a typed version of (λxy.yx)?
+    ((λx.(y.yx)) x: 0, y: 0→0 // Here the prof cheated by just saying y is 0→0
     
+    (λx^0:(λy^[0→0](y^[0→0x^0]))) // Innermost bracket has type 0, inner is a (0→0)→0, outermost is 0→((0→0)→0)
     
+    If rules are respected, then we say it's well typed
     
+    Strongly normalizing → every computation beta-reduces and terminates, which is cool!
+    But this means some (divergent terms) cannot be typed! eg (λx.xx)
+    Suppose that x: s, then x: s→t, but that goes on forever! (inf recursion!) So we cannot type this
     
-    
-    
-    
-    
-    
-    
+    This also means we can't type a legal program:
+    (λx.y)(λx.xx)
     
     */
     
