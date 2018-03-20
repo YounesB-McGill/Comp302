@@ -438,16 +438,65 @@ object ClassNotes2{
    
    
    //  T Y P E S
-   Most practcial languages have types.
+   Most practical languages have types.
    Often have static types, like in Java, eg String foo(Object o, ArrayList<String> a, ...)
    
    Nominative type system: Type name is important, eg int != char
-   Structural type system: What type allows
+   Structural type system: What type allows // Some dynamic languages allow this. Scala kinda does this if we want. 
+   Sluggish and slow but still possible
         
+   Tue 20 Mar 2018
+   Static vs dynamic types:
+   Static types: Must specify types, eg C or Java: String foo; Scala does this for the most part. We'll focus on this. Static typing
+   allows us to validate types visually, eg we know in Java that int i = "foo"; is wrong!
+   Dynamic types: Are determined at runtime
           
-          
-          
+   Early reasons for types were to know the number of bits/words needed to store a variable, eg in C, a char is 8 bits, 
+   an int is a machine word (16/32/64 bits). long is at least a word, more if possible
+   
+   Back to the 1900's, an abstract reasoning about types due to Russell's Paradox
+   We can define sets of things. What is (dis)allowed in a set?
+   
+   Russell:
+   R = {x | x is a set, and x is not a member of itself}
+   
+   Is {0, 1, 2, 3} in R? Yes, since {0, 1, 2, 3} is not a member of {0, 1, 2, 3}.
+   Is (𝕫 U {𝕫}) in R? Nope!
+   Is R in R?
+   Assume R is in R. Now let's double check that:
+   if R is inside R:
+      then R is not in R since R is not supposed to be a member of itself
+   if R is not in R:
+      then R is a set, and R is not a member of itself, so R is in R
     
+   Contradiction!
+   
+   This is known as the impredictivity/viscious circle problem. Reason is that the definition refers to the entity being defined
+   
+   Philosophical/logical problem. 
+   
+   So we need to define things on levels/strata of types. We can't refer to things above. Only below or at same level.
+   
+   Is there sth analogous in computation?
+   
+   P = (λf.if(f(f)==0) then 1 else 0)
+   
+   (PP) diverges (infinite loop!). So inside computation we need to make levels to avoid divergent (bad) programs by using types.
+   
+   If we do so, does not negatively affect expressivity? ie, is this too strict that will block legal ops we want to do?
+   
+   
+   Base types are sets of things:
+   int, char, float, boolean. eg char = {..., 'a', 'b',...}
+   
+   Type constructors:
+   Package things into a record (Pascal), struct (C), Object (Java et al)
+    
+   We have specific rules that specify what is allows or not, eg in Java "abc"/7; is illegal
+   
+   There is a hierarchy of types (class hierarchy!). Sometimes this shows up in base types. eg is a float "bigger" than an int?
+   What is 7.0 + 3? There is implicit conversion, not because an int IS a float, but we convert it. In many cases we can coerce 
+   one type into another.
     
     
     
