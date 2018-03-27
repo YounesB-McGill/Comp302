@@ -633,6 +633,52 @@ object ClassNotes2{
     This also means we can't type a legal program:
     (λx.y)(λx.xx)
     
+    Thu 22 Mar 2018
+    
+    // TODO
+    
+    
+    Fri 27 Mar 2018
+    
+    Type proofs
+    
+    Gamma is a set of variables.
+    ',' is a union, but is often a set. 
+    End product is empty assumptions, because the type statement declaration is true under all circumstances
+    But keep in mind that each rule has to match EXACTLY 
+    So we need rules for everything.
+    
+    Functions:
+    Denoted by the arrow →
+    that of STLC
+    Axiom:
+    
+    _______________________
+    Γ, x: T1 ⊢ x: T1
+    
+    Abstract
+    
+            Γ, x: T1 ⊢ expr: T2
+    Rabs_______________________________
+            Γ ⊢ (λx.expr): T1 → T2
+            
+    Application
+
+            Γ ⊢ a: T1 → T2  
+    Rapp_______________________________
+            Γ ⊢ (a b): T2
+    
+    eg: λa(λb.a)
+    
+    
+                        Γ(a): 0
+                        _______
+            a: 0, b: 0 ⊢ a: 0
+      Rabs_________________________
+          a: 0 ⊢ (λb.a): 0 → 0
+    Rabs________________________________
+          ⊢ (λa(λb.a)): 0 → (0 → 0)
+        
     */
     
   } // end outerFunc
