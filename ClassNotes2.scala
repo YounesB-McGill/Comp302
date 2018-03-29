@@ -689,7 +689,87 @@ object ClassNotes2{
           a: 0 ⊢ (λb.a): 0 → 0
     Rabs________________________________
           ⊢ (λa(λb.a)): 0 → (0 → 0)
+    
+    
+    Thu 29 Mar 2018
+    
+    
+    
+    
+    */
+    def scalaTypingExample() = {
+      /* This is a symbol, in lambda calculus this is
+      let foo = λx.x+3 // abuse of notation
+      */
+      def foo(x: Int): Int = {
+        x + 3
+      }
+      
+      val foo2 = (x: Int) => { x + 3 } // Anonymous function binded to foo2
+
+      val y = 7
+      foo(y)
+    }
+    
+    /*
+    
+                                            Γ ... 0
+    Rabs____________________________        _________________________
+            ⊢ (x) => x+3: Int -> Int        foo: Int -> Int ⊢ let 3 in 
+                                                foo(y): Int
+    Rlet________________________________________________
+            ⊢ let foo = (x) => x + 3 in
+                let y = 3 in
+                   foo(y): Int      .
+                                  .
+                                .
+                              0
+                              
+     How do we do this with recursive functions?
+     
+              (       ): T
+     R _________________________________________
+        let: foo = λ. ... in foo()
         
+     This goes on forever, we need to know foo's type in order to know foo's type
+     
+     Soulution: Recursive variation on let rule (recursion inside recursion!)
+     
+     
+     
+              Γ, f: T' ⊢ expr: T'       Γ: f: T' ⊢ body: T
+     Rlet_r __________________________________________________
+              Γ ⊢ let f = expr in body 
+              
+     So it's safe to always use the recursive form, but we don't have to do that
+    
+    
+    eg, our fave function:
+    */
+    def fact(x: Int) = {
+      if(x==0) 1 
+      else x*fact(x-1)
+    }
+    
+    /*
+                                                                                          // Trivial (axiom)          // Trivial
+                                                                                   Rv_________________________      _____________________
+                                                                                        fact: I->I ⊢ fact: I->I     fact: I->I ⊢ 100: I
+                                                                                   Rapp__________________________________
+              fact: Int -> Int ⊢ (x)=> {if(x==0) 1 else x*fact(x-1)}: Int -> Int        fact: Int -> Int ⊢ fact(100): Int
+    Rlet_r ____________________________________________________________________
+            . ⊢ let fact = (x) => {if(x==0) 1 else x*fact(x-1)} in fact(100): Int
+            
+    
+          Γ,x:I ⊢ // TODO
+    Rabs_______________________________________________________________________
+          Γ = {f:I->I} ⊢ (x) => {if(x==0) 1 else x*fact(x-1)}: I->I
+    
+    
+    
+    
+    
+    
     */
     
   } // end outerFunc
