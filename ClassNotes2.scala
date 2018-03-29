@@ -757,7 +757,7 @@ object ClassNotes2{
                                                                                         fact: I->I ⊢ fact: I->I     fact: I->I ⊢ 100: I
                                                                                    Rapp__________________________________
               fact: Int -> Int ⊢ (x)=> {if(x==0) 1 else x*fact(x-1)}: Int -> Int        fact: Int -> Int ⊢ fact(100): Int
-    Rlet_r ____________________________________________________________________
+    Rlet_r _________________________________________________________________________________________________________________________________
             . ⊢ let fact = (x) => {if(x==0) 1 else x*fact(x-1)} in fact(100): Int
             
     
@@ -766,11 +766,138 @@ object ClassNotes2{
           Γ = {f:I->I} ⊢ (x) => {if(x==0) 1 else x*fact(x-1)}: I->I
     
     
+    The interesting part is saying that x * fact(x-1) is an Int.
+    It's a multiplication. x is an Int by Γ' 
+    Now the recusive application: x-1 is an Int since x is an Int (Use R- rule). fact is therfore an Int.
     
+    We need to add fact(): Int into Γ', so we have to add it to our type assumptions at the beginning
+    
+    This how Scala/Eclipse determines validity of types at compile time. In Java we have to specify types for everything.
+    This is one way of dertermining if the program is "well-typed"
+    
+    But in Scala, we don't always specify val types or function return types.
+    
+    How does this magic work?
+    */
+    val x = 3
+    /*
+    Scala know that 3 is an Int, therefore x must also be an Int
+    
+    In many cases the type of data is constrained. How can we figure this out?
+    
+    Type Inference:
+    Algorithmically derive types
+    
+    Scala does not always get this rite, but it gives us the idea.
+    
+    eg if(x) ... -> x must be a Boolean
+    
+    How could we do this?
+    
+    It's by a process of refining things, using the idea of a type variable
+    Start w a crude idea of associating data with type vars, then apply constraints to narrow down the types
+    (or any declared types, eg x: Int means  y = x is an Int too, and so is y + 3)
+    
+    Scala does this, so does
+    *ML, like OCaML, SML, Haskell // all functional languages
+    JavaScript: dynamically typed, but can be restricted by TypeScript, Flow (better type inference) etc
+    
+    How?
+    Most common algs all based on:
+    Damas-Hindley-Milner Algorithm = Algorithm W
+    start from type vars and then narrow it down 
+    (type rules resolve our constraints) + (unification (focus on this))
+    
+    
+    Unification:
+    Robinson's Algorithm:
+    Hard to describe, easy to implement
+    
+    find a mapping between variables and type st certain equality constarinst are guaranteed. 
+    
+    eg, Ta: t1 // Tx (Tau x) is a type, tn is a type var
+        Tb: Int 
+    
+    constraint Ta == Tb, true iff t1 is an Int
+    
+    Ta = t1 -> String
+    Tb = Boolean -> t2
+    
+    To have Ta == Tb, we must have t1 is a Boolean and t2 is a String
+    
+    
+    Ta = t1 -> t2
+    Tb = t3 -> t4
+    
+    To have Ta == Tb, we must have t1, t3 AND t2, t4 both of the same types
+    
+    
+    Not everything unifies:
+    Ta: Boolean; Tb: Int // Can't do it, sorry!
+    
+    ta: Int -> t1
+    Tb: t2 -> Boolean
+    Tc: Int -> String
+    
+    Can unify pairs, but not all 3, since t1 would have to be both a Boolean and a String 
+    
+    Notice that our types include:
+      - Base types: Int, Boolean, etc
+      - Type vars: t1, t2 etc
+      - Type ...: The arrow ->
+   
+    We'll need a mapping between expressions and types
+    (using Gamma)
+    
+    Must also map from type vars to other types (concrete/type vars). This is a substitution mapping: which is a fucntion
+    
+    S: typesvars -> types
+    
+    eg: S = {Int -> Boolean / t1, String/t2} (substitute t2 with String)
+    S = {t1 ⊢> Int -> Boolean, t2 ⊢> String} // where ⊢> is NOT a function arrow
+    
+    eg: 
+    S = {t1 ⊢> Int -> Boolean, t2 ⊢> Int}
+    Apply substitution to a type, ie apply all the amppings in S to the argument types: Give back a new type
+    
+    
+    Function composition is recursive!
+    S2 o S1 = S2(S1(...))
+    
+    
+    Now we can state Robinson's Unification Algorithm:
+    
+    def unify(t1: Type, t2: Type): Substitution = { 
+      cases{
+        // Base cases
+        T1 = t1: return {t1 ⊢> T2}*
+        T2 = t2: return {t2 ⊢> T1}*
+        
+        T1 = base1 && T2 = base2 // if basetypes, either trivial or impossible!
+        if(base1 == base2) return {} // unified!
+        else throw new UnunifiableException()
+        
+        // Constructed types
+        T1 = (T11 -> T12) &&
+        T2 = (T21 -> T22)
+        
+        S = unify() // unify the arguments to get a Substitution
+        S' = unify(S(T12), S(T22)) // Notice we apply the args subs to the indices here
+        
+        *Caveat:
+        eg, T1 = t1
+            T2 = t1 -> String
+                      S = {t1 ⊢> (t1 -> String)} // recursive type that never ends!
+        if t1 is free
+              in T2 throw new UnunifiableException() // occurs check
+      }
+    }
     
     
     
     */
+    
+
     
   } // end outerFunc
  
