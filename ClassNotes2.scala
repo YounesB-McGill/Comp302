@@ -635,8 +635,19 @@ object ClassNotes2{
     
     Thu 22 Mar 2018
     
-    // TODO
+    Let's give everything in λ calculus a type
     
+    The base type is 0.
+    
+    Goal of STLC is:
+    No divergence, and all types normalize via beta-reduction
+    No fixed-point combinator (since that's like an infinite recursion)
+    Church nums can be typed, but they'll give us too many restrictions
+    
+    We can do λx^0.x^0: 0 -> 0
+    But we can also do this x^(0->0).x^(0-0):
+    
+    // TODO
     
     Fri 27 Mar 2018
     
