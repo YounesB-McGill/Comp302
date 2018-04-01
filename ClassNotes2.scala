@@ -641,12 +641,19 @@ object ClassNotes2{
     
     Goal of STLC is:
     No divergence, and all types normalize via beta-reduction
-    No fixed-point combinator (since that's like an infinite recursion)
+    No fixed-point combinator (since that's like an infinite recursion) // No divergence
     Church nums can be typed, but they'll give us too many restrictions
     
     We can do λx^0.x^0: 0 -> 0
-    But we can also do this x^(0->0).x^(0-0):
+    But we can also do this x^(0->0).x^(0-0): This is an identity fct that can be typed
+    This works for any type, say alpha.
     
+    Polymorphic types
+    (λxy.y) =def (λx.(λy^0.y^0)) // Throw out x
+    
+    More abstact way to think abt this:
+    (λx^a y^b.y): (a → (b →b))
+        
     // TODO
     
     Fri 27 Mar 2018
