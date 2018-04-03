@@ -877,19 +877,21 @@ object ClassNotes2{
     def unify(t1: Type, t2: Type): Substitution = { 
       cases{
         // Base cases
-        T1 = t1: return {t1 ⊢> T2}*
+        T1 = t1: return {t1 ⊢> T2}* // Recall T is Tau, t is tee
         T2 = t2: return {t2 ⊢> T1}*
         
         T1 = base1 && T2 = base2 // if basetypes, either trivial or impossible!
-        if(base1 == base2) return {} // unified!
+        if(base1 == base2) return {} // unified! Return an empty Substitution
         else throw new UnunifiableException()
         
-        // Constructed types
+        // Constructed types = function types
         T1 = (T11 -> T12) &&
         T2 = (T21 -> T22)
         
-        S = unify() // unify the arguments to get a Substitution
+        S = unify() // unify the arguments to get a Substitution (recursive call)
         S' = unify(S(T12), S(T22)) // Notice we apply the args subs to the indices here
+        
+        return  S o S // ie S() Composition // TODO
         
         *Caveat:
         eg, T1 = t1
@@ -898,11 +900,188 @@ object ClassNotes2{
         if t1 is free
               in T2 throw new UnunifiableException() // occurs check
       }
+      
+      Tue 3 Apr 2018
+      
+      We can have T1 = t1 {t1 ⊢> t2}; 
+      Ok, since term does not expand infinitely
+      
+      unify(T1 = (t1 → int), T2 = (t2 → t2)) == {
+        // case 4
+        
+        // TODO 13:17
+        
+        unify(t1, t2) == sArgs = {t1 ⊢> t2}
+        
+        Now we unify the body types after applying the Substitution
+        sArgs == int
+        sArgs == t2
+        unify(int, t2) == sb == {t2 ⊢> int}
+        
+        // This is our unifier:
+        sb o sa == sb(sa(...)) == {t2 → int} o {t1 → t2} == {t1 → int, t2 → int} // Now it's a set. No need to worry abt order
+        
+        Now this unifies our original terms
+        s(t1 → int) = int → int // Unified
+        s(t2 → t2) = int → int  // terms
+      } 
+      
+      btw, cases 1 and 2 could have been done in the reverse order. Does that make a difference? Yes, then we would have gotten 
+      sa' = {t2 → t1}. If we continued, sa'(int) = int; sa'(t2) = t1; sb' == unify(int, t1) = {t1 ⊢> int}
+      sb' o sa' == ... int → int // Flip things around. ORDER OF THE COMPOSITION MATTERS!!!
+      
     }
     
+    More complex example:
+    T1 = int → (t1 → t2)
+    T2 = t3 → ((int → t3) → int)
+    
+    First unify the arg types
+    unify(int, t3) {t3 ⊢> int}: sa
+    
+    Then unify the body types under sa:
+    sa(t1 → t2) = t1 → t2
+    sa((int → t3) → int) = (int → int) → int
+    Recursively unify these types:
+    `t1` → t2
+    `(int → int)` → int
+    unify arg types sa {t1 ⊢> (int, int)}
+    unify the body internals:
+    sa'(t2) = t2
+    sa'(int) = int
+    sb' = {t2 ⊢> int}
+    
+    sb' o sa' = {t2 ⊢> int} o {t1 ⊢> (int → int)} = {t2 ⊢> int, t1 ⊢> (int → int)}
+    
+    Back one level:
+    sb o sa = {t2 ⊢> int, t1 ⊢> (int → int)} o {t3 ⊢> int} 
+      = {t1 ⊢> (int → int), t2 ⊢> int, t3 ⊢> int} // unifies
+      
+    Use s to unify terms
+    s(int → (t1 → t2)) = int → ((int → int) → int)
+    s(t3 → ((int → t3) → int)) = int → ((int → int) → int ) // They're the same!
+    
+    Robinson's alg computes a unifier t1 → t2, int → t2. Multiple unifiers are possible. Which should we use? Neat property:
+    Robinson returns the Most General Unifier (MGU), let's call it U.
+    U has the property that for any other (more specific) Substitution V, there is a Substitution W such that 
+      W o U = V
+      
+    Example: {t1 ⊢> int} = U; {t1 ⊢> int, t2 ⊢> int}: V;
+    W o U = V
+    W = {t2 ⊢> int}
     
     
-    */
+    So we can unify type terms.
+    
+    Type Inference:
+    Hindley-Milna = W
+    Uses unification internally
+    W(G, expr) return (S, T) st S(G) ⊢ expr: T
+    
+    
+    
+    Another important course concept:
+    
+    SEMANTICS OF LANGUAGES
+    
+    We'll use structural induction to show behavior, exp in 1 case
+    
+    We did this in proofs, by breaking things down (see Comp240), like recursion, until we reach a base case
+    
+    We'll also use this startegy for showing how our language "works."
+    
+    Language semantics give meaning to the execution to a language (what a program means). 2 main kinds - must be very formal!
+    
+    1) Operational sematics: very explicit in explaining meaning of program as it executes. We'll focus on this.
+       Assumes a specific machine execution model, eg x + y means LDR X; LDR Y, ADD x y
+       
+    2) Denotational semantics: // Not covered!
+       What it implies in another domain? [[x + y]]_|N = sum of two mumbers
+       [[ 3 ]]_(+/-) = positive
+    
+    We'll consider the imperative language IMP
+    No functions!
+    3 types of statements:
+      Arithmetic expressions: A, a1, a2, a3, ...
+      Boolean expressions: B b1, b2, ...
+      Commands: C c1, c2, ...
+      
+      <program> ::= <C>
+      <C> ::= skip // Same as NOP
+            | x = <A> // variable x1, x2, ... = assignment (allowed here)
+            | <C>; <C> // sequence of 2 things. Not left recursive
+            | if <B> then <C> else <C>
+            | while <B> do <C>
+      
+      // 
+      <B> ::= T | F | <A> (.) <A> | <B> (/) <B> | ~<B>
+      
+      //   constants or vars or operations on A
+      <A> ::= n | x | <A> (+) <A>
+      
+      (+) ∈ {+, -, *} // Dont wan't divByZero!
+      (.) ∈ {<=, ==, >=, <, >, }
+      ()
+      
+      Structural operational semantics (SOS) [1981]
+      Simplified machine model can do basic operations, some memory store (a var → value mapping)
+      Actual seantics are given by rules, similar to typing rules we saw before, in the form
+      if A is true then B can be concluded. We'll add to that by saying B can be transformed into B'
+      
+                      A
+      ______________________________________
+                    B → B'
+      
+      We have our context (was Gamma, now is our memory store S)
+      
+      
+      
+                <A, S>
+      __________________________________
+         <B, S>     →       <B', S'>
+         program        modified part of prog
+      
+      Rules:
+      
+      
+      var___________________________________________
+              <x, S>        →       <S(x), S>
+      
+      ie the meaning of var x is the value of x in the current store S.
+      
+      Operations: // Not all rules will given. U have to know how to derive!
+      
+      
+      _______________________________________
+        <n1 (+) n2, S>     →     <n3, S> // where n3 = n1 (+) n2, eg "3+4" The plus here is a char, the (+) in the machine is an ADD
+                                         // NOT THE SAME +!
+       
+      Ops on arithmetic expressions:
+      
+                <a1, S>   →   <a1', S>
+      ________________________________________
+         <a1 (+) a2, S>   →   <a1' (+) a2, S> // Reduce left hand side
+
+
+                <a2, S>   →   <a2', S>
+      ________________________________________
+         <n (+) a2, S>   →   <n (+) a2', S> // Reduce rite hand side. a2 != n
+         
+         
+         
+     
+      Boolean:
+      
+      __________________________________
+         <b1 (.) b2, S>   →   <b3, S> 
+         
+                  
+      ________________________
+        <!T, S>   →   <F, S>
+        
+      ________________________
+        <!F, S>   →   <T, S>
+      */
     
 
     
