@@ -1,4 +1,5 @@
 import scala.io.Source
+import scala.language.reflectiveCalls // added on Apr 10
 
 object ClassNotes2{
   
@@ -1081,9 +1082,260 @@ object ClassNotes2{
         
       ________________________
         <!F, S>   →   <T, S>
+        
+        
+        
+        
+         // TODO
+         
+         
+         
+         Tue 10 Apr 2018
+         
+         Switch statement is a good example. What does that mean?
+         We can translate this to nested if/then/else's // small step
+         
+         Big step for a switch:
+         
+           <a1==a2, S> ↓ F (false) <switch a1 cases, S> ↓ S'
+         ___________________________________________________
+           <switch a, case a2 C cases, S> // C is a command
+         
+         
+         
+           <a1==a2, S> ↓ T (true) <C, S> ↓ S'
+         ___________________________________________________
+           <switch a, case a2 C cases, S> ↓ S
+         
+         
+         
+         Default:
+         
+                    <C, S> ↓ S'
+         ___________________________________________________
+           <switch a, case a2 C cases, S> ↓ S'
+           
+           
+           
+           
+         Difficult example: 
+         Semantics of WML: hard since since we have functions, scopes, and environments (incl linking, parents). Not that bad.
+         Instead of S, we will have a parent env etc
+         
+         
+         
+         
+         Other language paradigms:
+         
+         Declarative programming{
+         Functional is a kind of declarative programming
+         Program specification is sufficient to get result. State what is true or should be true, and the system will figure this out
+         
+         Pure functional is declarative, eg x = foo(bar) is always true, since it's just like math. Impure means we have side effects
+         like I/O, which could affect us.
+         
+         Logic languages:
+         eg, Prolog. Not that popuar, but still interesting. Performance issues.
+         In Prolog, we declare facts as simple things (rules/constraints), and relationships
+         Then, we query the system to get what we want.
+         
+         Restricted set of logic rules, to allow inferences. These are called Horn clauses [A Horn 1951]
+         We can specify properties as disjunctions of literals, eg A v B v C v D.
+         With Horn clauses, only one is positive, eg  ~A v ~B v ~C v D
+         "One of A or B or C is false, or D is true"
+         
+         ie (A ^ B ^ C) => D "if all of A, B, and C are true, then D is true"
+         
+         In Prolog we have this syntax:
+         D :- A, B, C  % implied search (this is a comment)
+         
+         In order to show D, we must show A, B, and C // abuse notation
+         
+         
+         eg:
+         
+         _______________
+         | A      |         B
+         |        |______
+         |        |  C  |
+         |________|_____|________
+         |    E   |
+         |        |        D 
+         
+         
+         adj(A,B) :- true
+         adj(A,C)
+         adj(A,D)
+         adj(A,D)
+         
+         adj(B,C)
+         adj(B,D)
+         adj(C,D)
+         adj(D,E)
+         
+         % query
+         ?- adj(B,C) % yes 
+         
+         ?- adj(B,A) % no. System does not know this from the rules
+         ?- adj(E,C) % no
+         
+         % Now let's add this rule:
+         adj(x,y) :- adj(y,x)
+         
+         % So now:
+         ?- adj(B,A) % yes
+         
+         % x is a variable
+         ?- adj(C,x) % also includes implicit case (x,C)
+         % Prolog will answer with a list: x = A, x = B, x = C. Find all bindings for x for which query is true
+         
+         % This magic happens by doing an AI backtracking tree search.
+         
+         % Suppose we want to do graph coloring: Color each region st no two neiboring regions have same color
+         
+          _______________
+         | A      |         B Blue
+         |        |______
+         | Red    |C (Grn)|
+         |________|_______|________
+         |    E   |
+         |  Blue  |        D Yellow
+         
+         c(A, red)
+         c(B, blue)
+         c(C, green)
+         c(D, yellow)
+         c(E, blue)
+         
+         
+         conflict :- adj(x,y), c(x, color), c(y, color)
+         
+         ?- conflict  % It's going to do lot of work (using adj etc) to say no
+         
+         % For this to work, we have to be talking about the same x, y, color on the RHS.Search is more complicated
+         % Solution is to use Unification!
+         
+         % Unification of functions "very easy"
+         % f(x1, x2, x3, ..., xn) =? g(y1, ..., ym)
+         % Must have same arity (num of params) n == m, and f == g (eg ca't unify foo with bar)
+         % Unify the arguments pairwise
+         
+         % assume a, b are atoms (basic things); x, y are variables.
+         % a            a       unify   {}
+         % f(3)         f(3)    unify   {}
+         % a            b       No they do not unify. Maybe need to unify
+         % f("hello")   f(3)    No
+         % f(x)         f(2a)   Unify { x ⊢> 2a }
+         % f(x)         f(y)    Unify { x ⊢> y } or { y ⊢> x }
+         % f(x, a)      f(b, y) Unify {x ⊢> b} o {y ⊢> a}
+         % f(x, a)      f(g(z),y) Unify {x ⊢> g(z)} o {y ⊢> a}
+         
+         % Still f(x,a) =? f(g(x),x) {x ⊢> g(x)} Not allowed! Infinite recursion
+         % Why, because we want to replace x with g(x) to get x = g(x) = g(g(x)) = ...
+         
+         % f(x,x) =? f(a,b) where a != b. Can't Unify since we can't bind x twice!
+         % f(x,x) =? f(y,a) Ok, as long as { y ⊢> a }
+         
+         
+         } // end Declarative programming
+         
+         
+         DYNAMIC TYPING {
+         
+         In Scala, it infers types, eg val x = 5
+         
+         In dynamic typing, we figure out types at runtime, and we have automatic type-conversion
+         
+         Some say these langs are "untyped" or "one type," but that's not stricly true. That is true for:         
+         Untyped lambda calculus, assembly language
+         
+         Dynamic languages are scripting languages, like bash, Python, JavaScript.
+         
+         In general, these are not used for large-scale programs, Python being the exception
+         
+         Duck-typing: Don't care abt what type is. If it has the properties we want, Ok:
+         
+         JavaScript example:
+         
+         function Snake() {
+            this.getSkin() = function () { // binding to a lambda abstraction
+                return "smooth";
+            }
+         }
+         
+         function Potato() {
+            this.getSkin() = function () {
+                return "papery";
+            }
+         }
+         
+         (new Snake()).getSkin(); // smooth
+         (new Potato()).getSkin(); // papery
+         
+         if(43<55){
+            sp = new Snake(); // var, don't do this! Bound to global scope
+         } else {
+            sp = new Potato();
+         }
+         sp.getSkin(); // smooth
+         
+         
+         } // dynamic typing
+         
+         This does not work in Scala! Scala is a nominative 
       */
     
+    class Snake{
+      def getSkin() = { "smooth" }
+    }
+    
+    class Potato{
+      def getSkin() = { "papery" }
+    }
+    
+    /*
+    Structural typing
+    
+    struct foo {
+      int x;
+      double d;
+    }
+    
+    struct bar {
+      int x;
+      double d;
+    }
+    
+    Are these the same? No, but they  are interchangeable, and can be treated the same
+    
+    We can do this in Scala, but it's not efficient
+    This will make Scala inspect itself 
+    */
+    def foo(x: {def getSkin(): String }) = { // x is something that has a getSkin method
+      x.getSkin();
+    }
 
+    foo(new Snake())
+    foo(new Potato()) // Both work!
+    
+    /*
+    Dynamic types have disadvantages:
+    - Hard to figure out somethings
+    
+    eg in JavaScript: "5" + 3 is "53". What is "5" - 3? String - String doesn't work, so it actually returns 2
+    
+    if(false) "yes"; else "no" // no
+    if("") "yes"; else "no" // no 
+    if(0) "yes"; else "no" //no
+    if("0") "yes"; else "no" // yes
+    
+    
+    */
+    
+    
+    
+    
+    
     
   } // end outerFunc
  
