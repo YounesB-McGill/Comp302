@@ -747,7 +747,7 @@ object ClassNotes2{
      
               Γ, f: T' ⊢ expr: T'       Γ: f: T' ⊢ body: T
      Rlet_r __________________________________________________
-              Γ ⊢ let f = expr in body 
+              Γ ⊢ let f = expr in body : T
               
      So it's safe to always use the recursive form, but we don't have to do that
     
