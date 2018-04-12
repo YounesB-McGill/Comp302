@@ -1329,6 +1329,142 @@ object ClassNotes2{
     if(0) "yes"; else "no" //no
     if("0") "yes"; else "no" // yes
     
+    "" is false, nonEmpty Strings are always true, even "0" and "false"
+    
+    
+    Thu 12 Apr 2018 Last class!
+    
+    In JS
+    true + "" == String(true) == "true"
+    false + "" == "false" == String(false) == true // non-empty String
+    
+    So we can't go back and forth String <-> Boolean
+    
+    
+    ESOTERIC LANGUAGES // For your edification and amusement
+        
+    Not rly necessary to know. Esoteric means rly weird languages. To learn different models of computation.
+    
+    Java, Scala, Python, and C are similar, eg they have if statements, bindings etc
+    
+    Lambda calculus is not that weird, even thoit doesn't have numbers
+    
+    These languages are Turing complete, ie they can do everything that another lang can do, but not necessarily
+    in the nicest way, eg Churchill numbers. Take Comp330 for more info. This resource esolangs.org is a good detail.
+    
+    Brainf*ck (1993) // Name redacted for employer purposes
+    minimal language where the world is a big array. We have a pointer to an array index. 
+    8 single character commands:
+    + - // inc/dec value at cell
+    < > // move ptr left or rite
+    . , // output, input into current cell
+    [ ] // if current cell is 0, skip until we find the ]; else do the [...] go back to cmd preceding matching bracket
+    That can be used for applying conditionals and looping
+    
+    Example: add two numbers n and m:
+    ,>,[<+>-]<.
+    
+    Start pointing at the start arr location. Read value n, then move and read m. [Not zero, so go inside and increment n+1 (the +),
+    then move rite and decr m (m--)] Repeat this as many times as necessary, to get in the end arr[0] = m+n, arr[1] = 0. Then 
+    output the result (the dot).
+    
+    
+    Befunge (1993)
+    Intention is to make something that's hard to compile, but it's harder to understand.
+    Idea is make our code live in a 2D (80*25 = 1980's screensize) wrap-around array. There is a data stack.
+    
+    Start in top left, move L to R by default.
+    28 commands, which include: // regex syntax
+    [0-9] // push number to stack
+    +,-,*,/,% // push(pop() op pop()), in reverse order
+    push(pop() < pop()? 1 : 0) // Conditionals
+    < > ^ v // chg direction of code ptr
+    _ // if(pop()==0) go rite else go left
+    ? // Go in a random direction lol
+    p // pop(y,x,v), change the code at coordinate (x, y) to v. Self modifying code: dangerous!
+      // empty space is a NOP
+    
+    // Example: factorial
+    
+    &   >   :   1   -   :     v        v        *     _     $   .   e
+    _______________________________________________________________________
+        ^                     _        $        >     \     :   ^
+        
+        
+    Thue (2000)
+    Matrioshka language: lang inside a lang
+    2 pieces: grammar language, which is a set of rules that rewrite Strings:
+    <original> ::= <replacement>
+    And a String
+    The execution (semantics) of this are a bit free form: Pick any rule, find a LHS, replace it with corresponding RHS.
+    Continue until no more replacements can be made.
+    
+    2 special rules for I/O:
+    <original> ::= ::: // Find <original> in the String and replace with a line of input
+    <output> :== ~ // Find <original> in the String and delete it, then emit it
+    
+    This makes it hard to make programs, but still possible:
+    
+    Example: emit an infinite bit stream
+    // rules
+      b ::= ~0
+      b ::= ~1 // non-deterministc
+      ac ::= abc
+    ::=____________
+       abc
+       
+       ac 
+       b
+       
+       
+       
+       // Solutions for A4:
+       Q1. Everytime we see a lambda abs, do a anon func
+       
+       Q2: Types are an inductive definition.
+          tau ::= . | !tau
+          
+          let x=&y in
+            let z=&x in
+              let w=*z in
+                if (w==x) then
+                  let r=*&y in r
+                else
+                  let r=**z; in r
+                  
+                  G(x): T
+         Rvar___________________________ or Rvar___________________________
+                G |-  x: T                           G, x: T |- x: T
+                
+                    G |- x:T    G |- y: T       // Disallow comparing a bool to a pointer
+         Rcomp_______________________________
+                    G |- x==y: bool
+                
+                G |- b: bool    G |- c: T     G |- d: T 
+         Rif____________________________________________
+                  G |- if(b) then c else d: T
+                  
+         Rlet same as before
+          
+                G |- x: !T                        // Take off one pointer level = dereference
+         R*__________________________________     // ! is sufficient to say that only pointers allowed
+                G |- *x : T
+                
+              G |- x: T
+         R&_________________________
+              G |- &x: !T
+                  
+                  
+         Using ... is fine
+         
+         
+         
+       
+    
+    
+    
+    
+    
     
     */
     
