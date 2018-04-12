@@ -1458,10 +1458,24 @@ object ClassNotes2{
          Using ... is fine
          
          
-         
+         if statement does create new vars, so no need for left part of Rlet proof.
        
     
-    
+      Exam: 
+      Like the quizzes! In structure, but perhaps less MCQ, more short answers. A bit hard to do most of them
+      Covers the entire course. Stuff that overlaps is there, 
+      Syntax: Open book, bring your notes, your friends', Wikipedia printed out. ie don't memorize book.
+      Apply things you've learned. What does this regex do, what env is created in this context.
+      
+      Lookup takes time, so know the material. No exact syntax reqd of foldleft for example, but u should still need to know it
+      
+      If u miss a { in WML, we won't penalize heavily. Longer than quizzes, qsts a little harder. Know the material. Trace things out.
+      
+      No Prolog programming, but must understand horn clause and unification etc
+      
+      No giant proofs like A4 q2 since they're hard to mark
+      
+      Small step, big step qst: "I'll see what I'll come up with" switch is an example.
     
     
     
